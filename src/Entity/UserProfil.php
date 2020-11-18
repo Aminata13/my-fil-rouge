@@ -4,9 +4,13 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\UserProfilRepository;
+use ApiPlatform\Core\Annotation\ApiFilter;
 use Doctrine\Common\Collections\Collection;
 use ApiPlatform\Core\Annotation\ApiResource;
+use ApiPlatform\Core\Annotation\ApiSubresource;
 use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Validator\Constraints as Assert;
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\BooleanFilter;
 
 /**
  * @ORM\Entity(repositoryClass=UserProfilRepository::class)
@@ -14,10 +18,12 @@ use Doctrine\Common\Collections\ArrayCollection;
  *  routePrefix="/admin",
  *  attributes={
  *      "security"="is_granted('ROLE_ADMIN')",
- *      "security_message"="Vous n'avez pas accès à cette ressource."
+ *      "security_message"="Vous n'avez pas accès à cette ressource.",
+ *      "pagination_items_per_page"=2
  *  },
  *  itemOperations={"get", "put"}
  * )
+ * @ApiFilter(BooleanFilter::class, properties={"deleted"})
  */
 class UserProfil
 {
@@ -30,13 +36,20 @@ class UserProfil
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Assert\NotBlank(message="Le libelle est obligatoire.")
      */
     private $libelle;
 
     /**
      * @ORM\OneToMany(targetEntity=User::class, mappedBy="profil")
+     * @ApiSubresource
      */
     private $users;
+
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    private $deleted=false;
 
     public function __construct()
     {
@@ -86,6 +99,18 @@ class UserProfil
                 $user->setProfil(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getDeleted(): ?bool
+    {
+        return $this->deleted;
+    }
+
+    public function setDeleted(bool $deleted): self
+    {
+        $this->deleted = $deleted;
 
         return $this;
     }

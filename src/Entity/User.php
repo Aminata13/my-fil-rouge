@@ -13,7 +13,9 @@ use Symfony\Component\Security\Core\User\UserInterface;
  * @ORM\InheritanceType("JOINED")
  * @ORM\DiscriminatorColumn(name="type", type="string")
  * @ORM\DiscriminatorMap({"user" = "User", "admin" = "Admin", "apprenant" = "Apprenant", "formateur"="Formateur", "cm"="Cm"})
- * @ApiResource(iri="http://schema.org/Users")
+ * @ApiResource(iri="http://schema.org/Users",
+ *  itemOperations={"get", "put"}
+ * )
  */
 class User implements UserInterface
 {
