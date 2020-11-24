@@ -4,9 +4,12 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\UserRepository;
+use ApiPlatform\Core\Annotation\ApiFilter;
 use ApiPlatform\Core\Annotation\ApiResource;
+use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Security\Core\User\UserInterface;
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
 
 /**
  * @ORM\Entity(repositoryClass=UserRepository::class)
@@ -14,8 +17,24 @@ use Symfony\Component\Security\Core\User\UserInterface;
  * @ORM\DiscriminatorColumn(name="type", type="string")
  * @ORM\DiscriminatorMap({"user" = "User", "admin" = "Admin", "apprenant" = "Apprenant", "formateur"="Formateur", "cm"="Cm"})
  * @ApiResource(iri="http://schema.org/Users",
- *  itemOperations={"get", "put"}
- * )
+ *  collectionOperations={
+ *      "get"={
+ *          "path"="/admin/users",
+ *          "normalization_context"={"groups"={"user:read"}},
+ *          "access_control"="(is_granted('ROLE_ADMIN'))"
+ *      }
+ *  },
+ *  itemOperations={
+ *      "get"={
+ *          "path"="/admin/users/{id}",
+ *          "access_control"="(is_granted('ROLE_ADMIN'))"
+ *      },  
+ *      "delete"={
+ *          "access_control"="(is_granted('ROLE_ADMIN'))"
+ *      }
+ *  }
+ * ),
+ * @ApiFilter(SearchFilter::class, properties={"profil.libelle"})
  */
 class User implements UserInterface
 {
@@ -23,12 +42,14 @@ class User implements UserInterface
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
+     * @Groups({"user:read"})
      */
     protected $id;
 
     /**
      * @ORM\Column(type="string", length=180, unique=true)
      * @Assert\NotBlank(message="Le nom d'utilisateur est obligatoire.")
+     * @Groups({"user:read"})
      */
     private $username;
 
@@ -47,33 +68,49 @@ class User implements UserInterface
     /**
      * @ORM\ManyToOne(targetEntity=UserProfil::class, inversedBy="users")
      * @ORM\JoinColumn(nullable=false)
+     * @Groups({"user:read"})
      */
     private $profil;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Assert\NotBlank(message="Le nom est obligatoire.")
+     * @Groups({"user:read"})
      */
     private $lastname;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Assert\NotBlank(message="Le prénom est obligatoire.")
+     * @Groups({"user:read"})
      */
     private $firstname;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Assert\Email(message="L'adresse mail est invalide")
+     * @Groups({"user:read"})
      */
     private $email;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Assert\NotBlank(message="L'adresse est obligatoire.")
+     * @Groups({"user:read"})
      */
-    private $adress;
+    private $address;
 
     /**
      * @ORM\Column(type="blob", nullable=true)
+     * @Assert\NotBlank(message="L'avatar est obligatoire.")
+     * @Groups({"user:read"})
      */
     private $avatar;
+
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    private $deleted=false;
 
     public function getId(): ?int
     {
@@ -196,26 +233,38 @@ class User implements UserInterface
         return $this;
     }
 
-    public function getAdress(): ?string
+    public function getAddress(): ?string
     {
-        return $this->adress;
+        return $this->address;
     }
 
-    public function setAdress(string $adress): self
+    public function setAddress(string $address): self
     {
-        $this->adress = $adress;
+        $this->address = $address;
 
         return $this;
     }
 
     public function getAvatar()
     {
-        return $this->avatar;
+        return $this->avatar!=null?stream_get_contents($this->avatar):null;
     }
 
     public function setAvatar($avatar): self
     {
-        $this->avatar = $avatar;
+        $this->avatar = base64_encode($avatar);
+
+        return $this;
+    }
+
+    public function getDeleted(): ?bool
+    {
+        return $this->deleted;
+    }
+
+    public function setDeleted(bool $deleted): self
+    {
+        $this->deleted = $deleted;
 
         return $this;
     }

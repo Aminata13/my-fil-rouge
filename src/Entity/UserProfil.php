@@ -9,8 +9,10 @@ use Doctrine\Common\Collections\Collection;
 use ApiPlatform\Core\Annotation\ApiResource;
 use ApiPlatform\Core\Annotation\ApiSubresource;
 use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\BooleanFilter;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
  * @ORM\Entity(repositoryClass=UserProfilRepository::class)
@@ -19,11 +21,15 @@ use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\BooleanFilter;
  *  attributes={
  *      "security"="is_granted('ROLE_ADMIN')",
  *      "security_message"="Vous n'avez pas accès à cette ressource.",
- *      "pagination_items_per_page"=2
+ *      "pagination_items_per_page"=5
  *  },
- *  itemOperations={"get", "put"}
+ *  itemOperations={"get", "put", "delete"}
  * )
  * @ApiFilter(BooleanFilter::class, properties={"deleted"})
+ * @UniqueEntity(
+ *  fields={"libelle"},
+ *  message="Ce profil existe déjà."
+ * )
  */
 class UserProfil
 {
@@ -31,12 +37,14 @@ class UserProfil
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
+     * @Groups({"user:read"})
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=255)
      * @Assert\NotBlank(message="Le libelle est obligatoire.")
+     * @Groups({"user:read"})
      */
     private $libelle;
 
@@ -48,6 +56,7 @@ class UserProfil
 
     /**
      * @ORM\Column(type="boolean")
+     * @Groups({"user:read"})
      */
     private $deleted=false;
 
