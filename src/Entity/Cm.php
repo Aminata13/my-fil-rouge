@@ -22,6 +22,19 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  *         "route_name"="add_cm"
  *     }
  *  },
+ *  itemOperations={
+ *      "get"={
+ *          "security"="is_granted('CM_VIEW', object)",
+ *          "security_message"="Vous n'avez pas accès à ces informations."
+ *      },
+ *      "put"={
+ *          "method"="PUT",
+ *          "controller"=CmController::class,
+ *          "route_name"="edit_cm",
+ *          "security"="is_granted('CM_EDIT', object)",
+ *          "security_message"="Vous n'avez pas accès à ces informations."
+ *      }
+ *  },
  *  normalizationContext={"groups"={"user:read"}}
  * )
  * @UniqueEntity(

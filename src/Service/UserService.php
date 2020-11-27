@@ -3,11 +3,7 @@
 namespace App\Service;
 
 use ApiPlatform\Core\Validator\ValidatorInterface;
-use App\Entity\Admin;
-use App\Entity\Apprenant;
-use App\Entity\Cm;
-use App\Entity\Formateur;
-use App\Entity\User;
+use App\Repository\ApprenantRepository;
 use App\Repository\UserProfilRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Response;
@@ -15,7 +11,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 
-class AddUserSrv
+class UserService
 {
 
     private $serializer;
@@ -23,22 +19,24 @@ class AddUserSrv
     private $validator;
     private $userProfilRepository;
     private $manager;
+    private $refineFormDataSrv;
 
-    public function __construct(SerializerInterface $serializer, UserPasswordEncoderInterface $encoder, ValidatorInterface $validator, UserProfilRepository $userProfilRepository, EntityManagerInterface $manager)
+    public function __construct(SerializerInterface $serializer, UserPasswordEncoderInterface $encoder, ValidatorInterface $validator, UserProfilRepository $userProfilRepository, EntityManagerInterface $manager, RefineFormDataSrv $refineFormDataSrv)
     {
         $this->serializer = $serializer;
         $this->encoder = $encoder;
         $this->validator = $validator;
         $this->userProfilRepository = $userProfilRepository;
         $this->manager = $manager;
+        $this->refineFormDataSrv = $refineFormDataSrv;
     }
 
-    public function save($request, $entity): Response
+    public function addUser($request, $entity, $type): Response
     {
 
         $userTab = $request->request->all();
         
-        $profil = $this->findProfil($entity);
+        $profil = $this->userProfilRepository->findOneBy(array("libelle" => $type));
 
         $user = $this->serializer->denormalize($userTab, $entity, true);
         $user->setProfil($profil);
@@ -67,24 +65,28 @@ class AddUserSrv
         return new JsonResponse('success', Response::HTTP_CREATED, [], true);
     }
 
-    
-    public function findProfil($entity) {
-        switch ($entity) {
-            case ($entity == "App\Entity\Admin"):
-                return $this->userProfilRepository->findOneBy(array("libelle" => 'ADMIN'));
-                break;
-            case ($entity == "App\Entity\Apprenant"):
-                return $this->userProfilRepository->findOneBy(array("libelle" => 'APPRENANT'));
-                break;
-            case ($entity == "App\Entity\Formateur"):
-                return $this->userProfilRepository->findOneBy(array("libelle" => 'FORMATEUR'));
-                break;
-            case ($entity == "App\Entity\Cm"):
-                return $this->userProfilRepository->findOneBy(array("libelle" => 'CM'));
-                break;
-            default:
-            return new JsonResponse('Simple utilisateur', Response::HTTP_BAD_REQUEST, [], true);;
-                break;
+    public function editUser($request, $repository) {
+        $userId = $request->attributes->get('id');
+        $user = $repository->find($userId);
+
+        $data = $this->refineFormDataSrv->Refine($request);
+
+        foreach ($data as $key => $value) {
+            $setter = 'set'.ucfirst($key);
+            if ($key == "password") {
+                $user->$setter($this->encoder->encodePassword($user, $value));
+            } else {
+                $user->$setter($value);
+            }
         }
+
+        $errors = $this->validator->validate($user);
+        if (($errors) > 0) {
+            $errorsString = $this->serializer->serialize($errors, 'json');
+            return new JsonResponse($errorsString, Response::HTTP_BAD_REQUEST, [], true);
+        }
+
+        $this->manager->flush();
+        return new JsonResponse('success', Response::HTTP_OK, [], true);
     }
 }

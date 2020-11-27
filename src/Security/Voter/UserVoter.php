@@ -20,7 +20,7 @@ class UserVoter extends Voter
     {
         // replace with your own logic
         // https://symfony.com/doc/current/security/voters.html
-        return in_array($attribute, ['FORMATEUR_EDIT', 'APPRENANT_VIEW', 'FORMATEUR_VIEW', 'APPRENANT_VIEW'])
+        return in_array($attribute, ['FORMATEUR_EDIT', 'APPRENANT_VIEW', 'FORMATEUR_VIEW', 'APPRENANT_VIEW', 'ADMIN_VIEW', 'ADMIN_EDIT'])
             && $subject instanceof \App\Entity\User;
     }
 
@@ -28,33 +28,43 @@ class UserVoter extends Voter
     {
         $user = $token->getUser();
         // if the user is anonymous, do not grant access
-        if (!$user instanceof UserInterface) {
+        if (!($user instanceof UserInterface)) {
             return false;
         }
 
         // ... (check conditions and return true to grant permission) ...
         switch ($attribute) {
+            // logic to determine if the user can EDIT
+            // return true or false
             case 'FORMATEUR_EDIT':
-                // logic to determine if the user can EDIT
-                // return true or false
                 if ($this->security->isGranted('ROLE_FORMATEUR') && $subject === $user) {
                     return true;
                 }
                 return false;
             case 'APPRENANT_EDIT':
-                if ($this->security->isGranted('ROLE_FORMATEUR') || ($this->security->isGranted('ROLE_APPRENANT') && $subject === $user)) {
+                if ($this->security->isGranted('ROLE_FORMATEUR') || $subject === $user) {
                     return true;
                 }
                 return false;
+            case 'ADMIN_EDIT':
+                if ($this->security->isGranted('ROLE_ADMIN')  && $subject === $user) {
+                    return true;
+                }
+                return false;
+            // logic to determine if the user can VIEW
+            // return true or false
             case 'FORMATEUR_VIEW':
-                // logic to determine if the user can VIEW
-                // return true or false
                 if ($this->security->isGranted('ROLE_CM') || ($this->security->isGranted('ROLE_FORMATEUR') && $subject === $user)) {
                     return true;
                 }
                 return false;
             case 'APPRENANT_VIEW':
                 if ($this->security->isGranted('ROLE_CM') || $this->security->isGranted('ROLE_FORMATEUR') || ($this->security->isGranted('ROLE_APPRENANT') && $subject === $user)) {
+                    return true;
+                }
+                return false; 
+            case 'ADMIN_VIEW':
+                if ($this->security->isGranted('ROLE_ADMIN')) {
                     return true;
                 }
                 return false; 

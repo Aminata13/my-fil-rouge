@@ -21,6 +21,19 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  *         "route_name"="add_admin"
  *     }
  *  },
+ *  itemOperations={
+ *      "get"={
+ *          "security"="is_granted('ADMIN_VIEW', object)",
+ *          "security_message"="Vous n'avez pas accès à ces informations."
+ *      },
+ *      "put"={
+ *          "method"="PUT",
+ *          "controller"=AdminController::class,
+ *          "route_name"="edit_admin",
+ *          "security"="is_granted('ADMIN_EDIT', object)",
+ *          "security_message"="Vous n'avez pas accès à ces informations."
+ *      }
+ *  },
  *  normalizationContext={"groups"={"user:read"}}
  * )
  * @UniqueEntity(

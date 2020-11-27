@@ -26,7 +26,13 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  *          "security"="is_granted('FORMATEUR_VIEW', object)",
  *          "security_message"="Vous n'avez pas accès à ces informations."
  *      },
- *      "put"
+ *      "put"={
+ *          "method"="PUT",
+ *          "controller"=FormateurController::class,
+ *          "route_name"="edit_formateur",
+ *          "security"="is_granted('FORMATEUR_EDIT', object)",
+ *          "security_message"="Vous n'avez pas accès à ces informations."
+ *      }
  *  },
  *  normalizationContext={"groups"={"user:read"}}
  * )

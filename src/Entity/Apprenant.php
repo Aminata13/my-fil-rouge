@@ -21,12 +21,18 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  *          "route_name"="add_apprenant"
  *     }
  *  },
+ *  subresourceOperations={
+ *      "api_profil_sorties_apprenants_get_subresource"={
+ *          "access_control"="(is_granted('ROLE_ADMIN'))"
+ *      }
+ *  },
  *  itemOperations={
  *      "get"={
  *          "security"="is_granted('APPRENANT_VIEW', object)",
  *          "security_message"="Vous n'avez pas accès à ces informations."
  *      },
  *      "put"={
+ *          "method"="PUT",
  *          "controller"=ApprenantController::class,
  *          "route_name"="edit_apprenant",
  *          "security"="is_granted('APPRENANT_EDIT', object)",
@@ -46,12 +52,29 @@ class Apprenant extends User
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
-     * @Groups({"user:read"})
+     * @Groups({"user:read","profilSortie:read"})
      */
     protected $id;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=ProfilSortie::class, inversedBy="apprenants")
+     */
+    private $profilSortie;
 
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    public function getProfilSortie(): ?ProfilSortie
+    {
+        return $this->profilSortie;
+    }
+
+    public function setProfilSortie(?ProfilSortie $profilSortie): self
+    {
+        $this->profilSortie = $profilSortie;
+
+        return $this;
     }
 }

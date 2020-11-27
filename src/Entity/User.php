@@ -17,23 +17,24 @@ use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
  * @ORM\DiscriminatorColumn(name="type", type="string")
  * @ORM\DiscriminatorMap({"user" = "User", "admin" = "Admin", "apprenant" = "Apprenant", "formateur"="Formateur", "cm"="Cm"})
  * @ApiResource(iri="http://schema.org/Users",
+ *  routePrefix="/admin",
  *  collectionOperations={
- *      "get"={
- *          "path"="/admin/users",
- *          "normalization_context"={"groups"={"user:read"}},
+ *      "get"={"normalization_context"={"groups"={"user:read"}}}
+ *  },
+ *  subresourceOperations={
+ *      "api_user_profils_users_get_subresource"={
  *          "access_control"="(is_granted('ROLE_ADMIN'))"
  *      }
  *  },
  *  itemOperations={
- *      "get"={
- *          "path"="/admin/users/{id}",
- *          "access_control"="(is_granted('ROLE_ADMIN'))"
- *      },  
- *      "delete"={
- *          "access_control"="(is_granted('ROLE_ADMIN'))"
- *      }
+ *      "get", "delete"
+ *  },
+ *  attributes={
+ *      "security"="is_granted('ROLE_ADMIN')",
+ *      "security_message"="Vous n'avez pas accès à cette ressource.",
+ *      "pagination_items_per_page"=2
  *  }
- * ),
+ * )
  * @ApiFilter(SearchFilter::class, properties={"profil.libelle"})
  */
 class User implements UserInterface
@@ -49,7 +50,7 @@ class User implements UserInterface
     /**
      * @ORM\Column(type="string", length=180, unique=true)
      * @Assert\NotBlank(message="Le nom d'utilisateur est obligatoire.")
-     * @Groups({"user:read"})
+     * @Groups({"user:read","profilSortie:read"})
      */
     private $username;
 
@@ -75,35 +76,35 @@ class User implements UserInterface
     /**
      * @ORM\Column(type="string", length=255)
      * @Assert\NotBlank(message="Le nom est obligatoire.")
-     * @Groups({"user:read"})
+     * @Groups({"user:read","profilSortie:read"})
      */
     private $lastname;
 
     /**
      * @ORM\Column(type="string", length=255)
      * @Assert\NotBlank(message="Le prénom est obligatoire.")
-     * @Groups({"user:read"})
+     * @Groups({"user:read","profilSortie:read"})
      */
     private $firstname;
 
     /**
      * @ORM\Column(type="string", length=255)
      * @Assert\Email(message="L'adresse mail est invalide")
-     * @Groups({"user:read"})
+     * @Groups({"user:read","profilSortie:read"})
      */
     private $email;
 
     /**
      * @ORM\Column(type="string", length=255)
      * @Assert\NotBlank(message="L'adresse est obligatoire.")
-     * @Groups({"user:read"})
+     * @Groups({"user:read","profilSortie:read"})
      */
     private $address;
 
     /**
      * @ORM\Column(type="blob", nullable=true)
      * @Assert\NotBlank(message="L'avatar est obligatoire.")
-     * @Groups({"user:read"})
+     * @Groups({"user:read","profilSortie:read"})
      */
     private $avatar;
 

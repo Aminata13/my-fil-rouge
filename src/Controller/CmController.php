@@ -3,12 +3,11 @@
 namespace App\Controller;
 
 use App\Entity\Cm;
-use App\Service\AddUserSrv;
-use Doctrine\ORM\EntityManagerInterface;
+use App\Repository\CmRepository;
+use App\Service\UserService;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
@@ -21,8 +20,17 @@ class CmController extends AbstractController
      * @IsGranted("ROLE_ADMIN")
      * @Route(path="/cms", name="add_cm", methods="POST")
      */
-    public function addUser(Request $request, AddUserSrv $addUserSrv, EntityManagerInterface $em)
+    public function addUser(Request $request, UserService $userService): Response
     {
-        return $addUserSrv->save($request, Cm::class);
+        return $userService->addUser($request, Cm::class, "CM");
+    }
+
+    /**
+     * @IsGranted("ROLE_ADMIN")
+     * @Route(path="/cms/{id}", name="edit_cm", methods="PUT")
+     */
+    public function editUser(Request $request, CmRepository $repository, UserService $userService): Response
+    {
+        return $userService->editUser($request, $repository);
     }
 }
