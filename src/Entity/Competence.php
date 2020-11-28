@@ -4,11 +4,13 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\CompetenceRepository;
+use ApiPlatform\Core\Annotation\ApiFilter;
 use Doctrine\Common\Collections\Collection;
 use ApiPlatform\Core\Annotation\ApiResource;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\BooleanFilter;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
@@ -17,6 +19,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  * fields={"libelle"},
  * message="Cette compétence existe déjà."
  * )
+ * @ApiFilter(BooleanFilter::class, properties={"deleted"})
  * @ApiResource(
  *  denormalizationContext={"groups"={"competence:write"}},
  *  normalizationContext={"groups"={"competence:read_all"}},
@@ -72,6 +75,12 @@ class Competence
 
     /**
      * @ORM\OneToMany(targetEntity=NiveauEvaluation::class, mappedBy="competence", orphanRemoval=true, cascade={"persist"})
+     * @Assert\Valid
+     * @Assert\Count(
+     *      min = 3,
+     *      max = 3,
+     *      exactMessage="Les niveaux d'évaluation doivent être exactement au nombre de 3."
+     * )
      * @Groups({"competence:read_all", "competence:write"})
      */
     private $niveauEvaluations;

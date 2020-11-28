@@ -38,7 +38,12 @@ class TagDataPersister implements DataPersisterInterface
     {
         // TODO: Implement remove() method.
         $data->setDeleted(true);
-        
+
+        $groupeTags = $data->getGroupeTags();
+        foreach ($groupeTags as $value) {
+            $value->removeTag($data);
+        }
+
         $this->entityManager->flush();
     }
 }

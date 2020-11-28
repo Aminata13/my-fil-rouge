@@ -3,11 +3,14 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\NiveauEvaluationRepository;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Entity(repositoryClass=NiveauEvaluationRepository::class)
+ * @ApiResource()
  */
 class NiveauEvaluation
 {
@@ -21,18 +24,21 @@ class NiveauEvaluation
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Assert\NotBlank(message="Le libelle est obligatoire.")
      * @Groups({"competence:read_all", "competence:write"})
      */
     private $libelle;
 
     /**
      * @ORM\Column(type="text")
+     * @Assert\NotBlank(message="Le(s) groupe(s) d'action est(sont) obligatoire.")
      * @Groups({"competence:read_all", "competence:write"})
      */
     private $groupeAction;
 
     /**
      * @ORM\Column(type="text")
+     * @Assert\NotBlank(message="Le(s) critère(s) d'évaluation est(sont) obligatoire.")
      * @Groups({"competence:read_all", "competence:write"})
      */
     private $critereEvaluation;
