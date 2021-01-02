@@ -76,6 +76,11 @@ class GroupeTag
     /**
      * @ORM\ManyToMany(targetEntity=Tag::class, inversedBy="groupeTags", cascade={"persist"})
      * @ApiSubresource
+     * @Assert\Valid
+     * @Assert\Count(
+     *      min = 1,
+     *      minMessage="Au moins un  tag est requis."
+     * )
      * @Groups({"groupe_tag:write","groupe_tag:read"})
      */
     private $tags;

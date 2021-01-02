@@ -62,7 +62,7 @@ class UserService
         $this->manager->persist($user);
         $this->manager->flush();
 
-        return new JsonResponse('success', Response::HTTP_CREATED, [], true);
+        return new JsonResponse($this->serializer->serialize($user, 'json'), Response::HTTP_CREATED, [], true);
     }
 
     public function editUser($request, $repository) {
@@ -73,20 +73,14 @@ class UserService
 
         foreach ($data as $key => $value) {
             $setter = 'set'.ucfirst($key);
-            if ($key == "password") {
+            if ($key == "password" && $value !== '') {
                 $user->$setter($this->encoder->encodePassword($user, $value));
-            } else {
+            } elseif($value !== '') {
                 $user->$setter($value);
             }
         }
 
-        $errors = $this->validator->validate($user);
-        if (($errors) > 0) {
-            $errorsString = $this->serializer->serialize($errors, 'json');
-            return new JsonResponse($errorsString, Response::HTTP_BAD_REQUEST, [], true);
-        }
-
         $this->manager->flush();
-        return new JsonResponse('success', Response::HTTP_OK, [], true);
+        return new JsonResponse($this->serializer->serialize($user, 'json'), Response::HTTP_OK, [], true);
     }
 }

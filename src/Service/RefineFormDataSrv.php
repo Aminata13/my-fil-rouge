@@ -14,6 +14,7 @@ class RefineFormDataSrv {
         $elements = str_replace([$boundary, "Content-Disposition: form-data;"], "", $raw);
         $elementsTab = explode("\r\n\r\n", $elements);
         
+        dd($elementsTab);
         $data = [];
         for ($i=0; isset($elementsTab[$i]); $i+=2) {
             $key = str_replace(["\r\n", ' "', '"', ' name='], '', $elementsTab[$i]);

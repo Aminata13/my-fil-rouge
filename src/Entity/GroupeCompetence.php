@@ -2,13 +2,62 @@
 
 namespace App\Entity;
 
+use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\Collection;
+use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\GroupeCompetenceRepository;
 use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
-use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
  * @ORM\Entity(repositoryClass=GroupeCompetenceRepository::class)
+ *  @UniqueEntity(
+ * fields={"libelle"},
+ * message="Ce groupe de compétence existe déjà."
+ * )
+ * @ApiResource(
+ *  routePrefix="/admin",
+ *  denormalizationContext={"groups"={"grpcompetence:write"}},
+ *  normalizationContext={"groups"={"grpcompetence:read_all"}},
+ *  collectionOperations={
+ *      "get"={
+ *          "security"="(is_granted('ROLE_ADMIN') or is_granted('ROLE_FORMATEUR') or is_granted('ROLE_CM'))",
+ *          "normalization_context"={"groups"={"grpcompetence:read"}}
+ *      },
+ *      "getByCompetences"={
+ *          "method"="GET",
+ *          "path"="/groupe_competences/competences",
+ *          "access_control"="(is_granted('ROLE_ADMIN'))"
+ *      },
+ *      "post_groupe_competence"={
+ *         "method"="POST",
+ *         "path"="/groupe_competences",
+ *         "controller"=GroupeCompetenceController::class,
+ *         "route_name"="add_groupe_competence"
+ *     }
+ *  },
+ *  itemOperations={
+ *      "get"={
+ *          "access_control"="(is_granted('ROLE_ADMIN') or is_granted('ROLE_FORMATEUR') or is_granted('ROLE_CM'))",
+ *          "normalization_context"={"groups"={"grpcompetence:read"}}
+ *      },
+ *      "getByIdCompetence"={
+ *          "method"="GET",
+ *          "path"="/groupe_competences/{id}/competences",
+ *          "security"="(is_granted('ROLE_ADMIN') or is_granted('ROLE_FORMATEUR') or is_granted('ROLE_CM'))"
+ *      },
+ *      "put_groupe_competence"={
+ *         "method"="PUT",
+ *         "path"="/groupe_competences/{id}",
+ *         "controller"=GroupeCompetenceController::class,
+ *         "route_name"="edit_groupe_competence",
+ *         "denormalization_context"={"groups"={"grpcompetence:write"}}
+ *     },
+ *      "delete"
+ *  }
+ * )
  */
 class GroupeCompetence
 {
@@ -16,16 +65,21 @@ class GroupeCompetence
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
+     * @Groups({"grpcompetence:read","grpcompetence:read_all","referentiel:read","referentiel:read_all"})
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Assert\NotBlank(message="Le libelle est obligatoire.")
+     * @Groups({"grpcompetence:read","grpcompetence:read_all","grpcompetence:write","referentiel:read","referentiel:read_all","referentiel:write"})
      */
     private $libelle;
 
     /**
      * @ORM\Column(type="text")
+     * @Assert\NotBlank(message="Une description est requise.")
+     * @Groups({"grpcompetence:read","grpcompetence:read_all","grpcompetence:write","referentiel:read","referentiel:read_all"})
      */
     private $description;
 
@@ -35,7 +89,12 @@ class GroupeCompetence
     private $deleted=false;
 
     /**
-     * @ORM\ManyToMany(targetEntity=Competence::class, inversedBy="groupeCompetences")
+     * @ORM\ManyToMany(targetEntity=Competence::class, inversedBy="groupeCompetences", cascade={"persist"})
+     * @Assert\Count(
+     *      min = 1,
+     *      minMessage="Au moins une compétence est requise."
+     * )
+     * @Groups({"grpcompetence:read","grpcompetence:read_all","grpcompetence:write","referentiel:read_all"})
      */
     private $competences;
 

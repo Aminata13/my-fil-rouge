@@ -18,28 +18,28 @@ class NiveauEvaluation
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
-     * @Groups({"competence:read_all"})
+     * @Groups({"competence:read_all", "grpcompetence:read_all"})
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=255)
      * @Assert\NotBlank(message="Le libelle est obligatoire.")
-     * @Groups({"competence:read_all", "competence:write"})
+     * @Groups({"competence:read_all", "competence:write", "grpcompetence:read_all"})
      */
     private $libelle;
 
     /**
      * @ORM\Column(type="text")
      * @Assert\NotBlank(message="Le(s) groupe(s) d'action est(sont) obligatoire.")
-     * @Groups({"competence:read_all", "competence:write"})
+     * @Groups({"competence:read_all", "competence:write", "grpcompetence:read_all"})
      */
     private $groupeAction;
 
     /**
      * @ORM\Column(type="text")
      * @Assert\NotBlank(message="Le(s) critère(s) d'évaluation est(sont) obligatoire.")
-     * @Groups({"competence:read_all", "competence:write"})
+     * @Groups({"competence:read_all", "competence:write", "grpcompetence:read_all"})
      */
     private $critereEvaluation;
 

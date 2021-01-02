@@ -19,6 +19,25 @@ class ReferentielRepository extends ServiceEntityRepository
         parent::__construct($registry, Referentiel::class);
     }
 
+    /**
+     * @return Referentiel[] Returns an array of Referentiel objects
+     */
+    
+    public function findByExampleField($idReferentiel, $idGroupeComp)
+    {
+        return $this->createQueryBuilder('r')
+            ->select('r,g,c')
+            ->andWhere('r.id = :ref')
+            ->innerJoin('r.groupeCompetences', 'g')
+            ->andWhere('g.id = :comp')
+            ->innerJoin('g.competences', 'c')
+            ->setParameters(array('ref'=>$idReferentiel, 'comp'=>$idGroupeComp))
+            ->getQuery()
+            ->getResult()
+        ;
+    }
+   
+
     // /**
     //  * @return Referentiel[] Returns an array of Referentiel objects
     //  */

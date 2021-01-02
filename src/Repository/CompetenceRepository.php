@@ -21,15 +21,11 @@ class CompetenceRepository extends ServiceEntityRepository
 
     // /**
     //  * @return Competence[] Returns an array of Competence objects
-    //  */
-    /*
-    public function findByExampleField($value)
+    //  */  
+   /*  public function findByExampleField()
     {
         return $this->createQueryBuilder('c')
-            ->andWhere('c.exampleField = :val')
-            ->setParameter('val', $value)
-            ->orderBy('c.id', 'ASC')
-            ->setMaxResults(10)
+            ->innerJoin('c.groupeCompetences', 'g')
             ->getQuery()
             ->getResult()
         ;

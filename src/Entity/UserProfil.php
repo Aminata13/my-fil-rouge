@@ -21,7 +21,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  *  attributes={
  *      "security"="is_granted('ROLE_ADMIN')",
  *      "security_message"="Vous n'avez pas accès à cette ressource.",
- *      "pagination_items_per_page"=5
+ *      "pagination_items_per_page"=10
  *  },
  *  itemOperations={"get", "put", "delete"}
  * )

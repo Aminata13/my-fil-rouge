@@ -19,7 +19,7 @@ use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
  * @ApiResource(iri="http://schema.org/Users",
  *  routePrefix="/admin",
  *  collectionOperations={
- *      "get"={"normalization_context"={"groups"={"user:read"}}}
+ *      "get"={"normalization_context"={"groups"={"user:read"}},"pagination_fetch_join_collection"=true,}
  *  },
  *  subresourceOperations={
  *      "api_user_profils_users_get_subresource"={
@@ -32,7 +32,7 @@ use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
  *  attributes={
  *      "security"="is_granted('ROLE_ADMIN')",
  *      "security_message"="Vous n'avez pas accès à cette ressource.",
- *      "pagination_items_per_page"=2
+ *      "pagination_items_per_page"=3
  *  }
  * )
  * @ApiFilter(SearchFilter::class, properties={"profil.libelle"})

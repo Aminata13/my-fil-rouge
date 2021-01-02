@@ -4,9 +4,9 @@ namespace App\DataPersister;
 
 use Doctrine\ORM\EntityManagerInterface;
 use ApiPlatform\Core\DataPersister\DataPersisterInterface;
-use App\Entity\Tag;
+use App\Entity\Competence;
 
-class TagDataPersister implements DataPersisterInterface
+class CompetenceDataPersister implements DataPersisterInterface
 {
     private $entityManager;
 
@@ -18,11 +18,11 @@ class TagDataPersister implements DataPersisterInterface
     public function supports($data): bool
     {
         // TODO: Implement supports() method.
-        return $data instanceof Tag;
+        return $data instanceof Competence;
     }
 
     /**
-     * @param Tag $data
+     * @param Competence $data
      */
     public function persist($data)
     {
@@ -32,16 +32,15 @@ class TagDataPersister implements DataPersisterInterface
     }
 
     /**
-     * @param Tag $data
+     * @param Competence $data
      */
     public function remove($data)
     {
         // TODO: Implement remove() method.
         $data->setDeleted(true);
-
-        $groupeTags = $data->getGroupeTags();
-        foreach ($groupeTags as $value) {
-            $data->removeGroupeTag($value);
+        $groupeCompetences = $data->getGroupeCompetences();
+        foreach ($groupeCompetences as $value) {
+            $data->removeGroupeCompetence($value);
         }
 
         $this->entityManager->flush();

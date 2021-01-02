@@ -41,3 +41,7 @@ security:
         - { path: ^/api/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/api$,      roles: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/api,       roles: IS_AUTHENTICATED_FULLY }
+    role_hierarchy:
+        ROLE_USER: ROLE_APPRENANT
+        ROLE_ADMIN:       [ROLE_FORMATEUR, ROLE_CM]
+        ROLE_SUPER_ADMIN: ROLE_ADMIN

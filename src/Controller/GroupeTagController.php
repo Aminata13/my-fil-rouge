@@ -42,7 +42,6 @@ class GroupeTagController extends AbstractController
      */
     public function addGroupeTag(Request $request): Response
     {
-        dd('toto');
         $data = $this->serializer->denormalize(json_decode($request->getContent(), true), GroupeTag::class, true);
 
         $errors = $this->validator->validate($data);
@@ -52,10 +51,6 @@ class GroupeTagController extends AbstractController
         }
 
         $tags = $data->getTags();
-
-        if (count($tags) < 1) {
-            return new JsonResponse("Un tag est requis.", Response::HTTP_BAD_REQUEST, [], true);
-        }
 
         $groupeTag = new GroupeTag();
         $groupeTag->setLibelle($data->getLibelle());
@@ -73,13 +68,9 @@ class GroupeTagController extends AbstractController
             }
         }
 
-        if (count($groupeTag->getTags()) < 1) {
-            return new JsonResponse("Le libelle d'un tag est requis.", Response::HTTP_BAD_REQUEST, [], true);
-        }
-
         $this->manager->persist($groupeTag);
         $this->manager->flush();
-        return new JsonResponse("success", Response::HTTP_CREATED, [], true);
+        return new JsonResponse($this->serializer->serialize($groupeTag, 'json'), Response::HTTP_CREATED, [], true);
     }
 
     /**
@@ -88,7 +79,6 @@ class GroupeTagController extends AbstractController
      */
     public function editGroupeTag(int $id, Request $request): Response
     {
-        dd('tata');
         $data = json_decode($request->getContent(), true);
         $groupeTag = $this->groupeTagRepository->find($id);
 
@@ -124,6 +114,6 @@ class GroupeTagController extends AbstractController
         }
 
         $this->manager->flush();
-        return new JsonResponse('success', Response::HTTP_OK, [], true);
+        return new JsonResponse($this->serializer->serialize($groupeTag, 'json'), Response::HTTP_OK, [], true);
     }
 }

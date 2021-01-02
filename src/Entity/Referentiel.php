@@ -2,13 +2,64 @@
 
 namespace App\Entity;
 
-use App\Repository\ReferentielRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use App\Controller\ReferentielController;
+use App\Repository\ReferentielRepository;
+use Doctrine\Common\Collections\Collection;
+use ApiPlatform\Core\Annotation\ApiResource;
+use ApiPlatform\Core\Annotation\ApiSubresource;
+use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
  * @ORM\Entity(repositoryClass=ReferentielRepository::class)
+ * @UniqueEntity(
+ * fields={"libelle"},
+ * message="Ce référentiel existe déjà."
+ * )
+ * @ApiResource(
+ *  routePrefix="/admin",
+ *  denormalizationContext={"groups"={"referentiel:write"}},
+ *  normalizationContext={"groups"={"referentiel:read_all"}},
+ *  collectionOperations={
+ *      "get"={
+ *          "security"="is_granted('ROLE_FORMATEUR')",
+ *          "normalization_context"={"groups"={"referentiel:read"}}
+ *      },
+ *      "get_all"={
+ *          "method"="GET",
+ *          "path"="/referentiels/groupe_competences",
+ *          "security"="is_granted('ROLE_CM')"
+ *      },
+ *      "post_referentiel"={
+ *         "method"="POST",
+ *         "route_name"="add_referentiel",
+ *         "path"="/referentiels",
+ *         "controller"=ReferentielController::class
+ *     }
+ *  },
+ *  itemOperations={
+ *      "get"={
+ *          "security"="is_granted('ROLE_CM')",
+ *          "normalization_context"={"groups"={"referentiel:read"}}
+ *      },
+ *      "get_competences"={
+ *          "method"="GET",
+ *          "path"="/referentiels/{idReferentiel}/groupe_competences/{idGroupeComp}",
+ *          "controller"=ReferentielController::class,
+ *          "route_name"="show_competences_by_referentiel"
+ *      },
+ *      "put_referentiel"={
+ *         "method"="PUT",
+ *         "path"="/referentiels/{id}",
+ *         "controller"=ReferentielController::class,
+ *         "route_name"="edit_referentiel"
+ *     },
+ *      "delete"={"security"="is_granted('ROLE_ADMIN')"}
+ *  }
+ * )
  */
 class Referentiel
 {
@@ -16,36 +67,64 @@ class Referentiel
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
+     * @Groups({"referentiel:read","referentiel:read_all"})
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Assert\NotBlank(message="Le libelle est obligatoire.")
+     * @Groups({"referentiel:read","referentiel:read_all","referentiel:write"})
      */
     private $libelle;
 
     /**
      * @ORM\Column(type="text")
+     * @Assert\NotBlank(message="La présentation est obligatoire.")
+     * @Groups({"referentiel:read","referentiel:read_all","referentiel:write"})
      */
     private $description;
 
     /**
-     * @ORM\OneToMany(targetEntity=CritereAdmission::class, mappedBy="referentiel", orphanRemoval=true)
+     * @ORM\OneToMany(targetEntity=CritereAdmission::class, mappedBy="referentiel", orphanRemoval=true, cascade={"persist"})
+     * @Assert\Count(
+     *      min = 1,
+     *      minMessage="Au moins un critère d'admission est requis."
+     * )
+     * @Groups({"referentiel:read","referentiel:read_all"})
      */
     private $critereAdmissions;
 
     /**
-     * @ORM\OneToMany(targetEntity=CritereEvaluation::class, mappedBy="referentiel", orphanRemoval=true)
+     * @ORM\OneToMany(targetEntity=CritereEvaluation::class, mappedBy="referentiel", orphanRemoval=true, cascade={"persist"})
+     * @Assert\Count(
+     *      min = 1,
+     *      minMessage="Au moins un critère d'évaluation est requis."
+     * )
+     * @Groups({"referentiel:read","referentiel:read_all"})
      */
     private $critereEvaluations;
 
     /**
      * @ORM\ManyToMany(targetEntity=GroupeCompetence::class, inversedBy="referentiels")
+     * @Assert\Count(
+     *      min = 1,
+     *      minMessage="Au moins un critère d'admission est requis."
+     * )
+     * @Groups({"referentiel:read","referentiel:read_all"})
+     * @ApiSubresource
      */
     private $groupeCompetences;
 
     /**
      * @ORM\Column(type="blob")
+     * @Assert\File(
+     *     maxSize = "1024k",
+     *     mimeTypes = {"application/pdf", "application/x-pdf"},
+     *     mimeTypesMessage = "Please upload a valid PDF",
+     *     uploadNoFileErrorMessage="Test"
+     * )
+     * @Groups({"referentiel:read","referentiel:read_all"})
      */
     private $programme;
 
@@ -54,11 +133,17 @@ class Referentiel
      */
     private $deleted=false;
 
+    /**
+     * @ORM\ManyToMany(targetEntity=Promotion::class, mappedBy="referentiels")
+     */
+    private $promotions;
+
     public function __construct()
     {
         $this->critereAdmissions = new ArrayCollection();
         $this->critereEvaluations = new ArrayCollection();
         $this->groupeCompetences = new ArrayCollection();
+        $this->promotions = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -176,12 +261,12 @@ class Referentiel
 
     public function getProgramme()
     {
-        return $this->programme;
+        return stream_get_contents($this->programme);
     }
 
     public function setProgramme($programme): self
     {
-        $this->programme = $programme;
+        $this->programme = base64_encode($programme);
 
         return $this;
     }
@@ -194,6 +279,33 @@ class Referentiel
     public function setDeleted(bool $deleted): self
     {
         $this->deleted = $deleted;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Promotion[]
+     */
+    public function getPromotions(): Collection
+    {
+        return $this->promotions;
+    }
+
+    public function addPromotion(Promotion $promotion): self
+    {
+        if (!$this->promotions->contains($promotion)) {
+            $this->promotions[] = $promotion;
+            $promotion->addReferentiel($this);
+        }
+
+        return $this;
+    }
+
+    public function removePromotion(Promotion $promotion): self
+    {
+        if ($this->promotions->removeElement($promotion)) {
+            $promotion->removeReferentiel($this);
+        }
 
         return $this;
     }

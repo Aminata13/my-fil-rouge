@@ -61,6 +61,11 @@ class Apprenant extends User
      */
     private $profilSortie;
 
+    /**
+     * @ORM\ManyToOne(targetEntity=Promotion::class, inversedBy="apprenants")
+     */
+    private $promotion;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -74,6 +79,18 @@ class Apprenant extends User
     public function setProfilSortie(?ProfilSortie $profilSortie): self
     {
         $this->profilSortie = $profilSortie;
+
+        return $this;
+    }
+
+    public function getPromotion(): ?Promotion
+    {
+        return $this->promotion;
+    }
+
+    public function setPromotion(?Promotion $promotion): self
+    {
+        $this->promotion = $promotion;
 
         return $this;
     }

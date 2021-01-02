@@ -2,11 +2,14 @@
 
 namespace App\Entity;
 
-use App\Repository\CritereAdmissionRepository;
 use Doctrine\ORM\Mapping as ORM;
+use ApiPlatform\Core\Annotation\ApiResource;
+use App\Repository\CritereAdmissionRepository;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * @ORM\Entity(repositoryClass=CritereAdmissionRepository::class)
+ * ApiResource()
  */
 class CritereAdmission
 {
@@ -14,11 +17,13 @@ class CritereAdmission
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
+     * @Groups({"referentiel:read","referentiel:read_all"})
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Groups({"referentiel:read","referentiel:read_all","referentiel:write"})
      */
     private $libelle;
 

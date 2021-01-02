@@ -7,25 +7,21 @@ use ApiPlatform\Core\Bridge\Doctrine\Orm\Util\QueryNameGenerator;
 use ApiPlatform\Core\DataProvider\CollectionDataProviderInterface;
 use ApiPlatform\Core\DataProvider\ContextAwareCollectionDataProviderInterface;
 use ApiPlatform\Core\DataProvider\RestrictedDataProviderInterface;
-use App\Repository\UserRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
-class UserDataProvider implements ContextAwareCollectionDataProviderInterface, RestrictedDataProviderInterface {
+class CollectionDataProvider implements ContextAwareCollectionDataProviderInterface, RestrictedDataProviderInterface {
     
-    private $userRepository;
     private $paginator;
-    private $manager;
     
-    public function __construct(UserRepository $userRepository, PaginationExtension $paginator, ManagerRegistry $manager)
+    public function __construct(PaginationExtension $paginator, ManagerRegistry $manager)
     {
-        $this->userRepository = $userRepository;
         $this->paginator = $paginator;
         $this->manager = $manager;
     }
 
     public function supports(string $resourceClass, string $operationName = null, array $context = []): bool
     {
-        return $resourceClass === 'App\Entity\User';
+        return $resourceClass !== 'App\Entity\User' && str_contains($resourceClass, 'App\Entity');
     }
 
     public function getCollection(string $resourceClass, string $operationName = null, array $context = [])
@@ -33,10 +29,9 @@ class UserDataProvider implements ContextAwareCollectionDataProviderInterface, R
         $queryBuilder = $this->manager
         ->getManagerForClass($resourceClass)
         ->getRepository($resourceClass)
-        ->createQueryBuilder('u')
-        ->innerJoin('u.profil', 'p')
-            ->andWhere('u.deleted = :deleted AND p.libelle != :profil')
-            ->setParameters(array('deleted'=>false, 'profil'=>'APPRENANT'))
+        ->createQueryBuilder('e')
+        ->andWhere('e.deleted = :deleted')
+        ->setParameter('deleted', false)
         ;
         
         $this->paginator->applyToCollection($queryBuilder, new QueryNameGenerator, $resourceClass, $operationName, $context);
