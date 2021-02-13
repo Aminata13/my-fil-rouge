@@ -13,7 +13,7 @@
         "doctrine/doctrine-bundle": "^2.2",
         "doctrine/doctrine-migrations-bundle": "^3.0",
         "doctrine/orm": "^2.7",
-        "lexik/jwt-authentication-bundle": "^2.9",
+        "lexik/jwt-authentication-bundle": "^2.10",
         "nelmio/cors-bundle": "^2.1",
         "phpdocumentor/reflection-docblock": "^5.2",
         "sensio/framework-extra-bundle": "^5.6",
@@ -29,6 +29,7 @@
         "symfony/monolog-bundle": "^3.6",
         "symfony/property-access": "5.1.*",
         "symfony/property-info": "5.1.*",
+        "symfony/proxy-manager-bridge": "5.1.*",
         "symfony/security-bundle": "5.1.*",
         "symfony/serializer": "5.1.*",
         "symfony/twig-bundle": "5.1.*",
@@ -84,7 +85,6 @@
     },
     "require-dev": {
         "doctrine/doctrine-fixtures-bundle": "^3.4",
-        "fzaninotto/faker": "^1.9",
-        "symfony/maker-bundle": "^1.23"
+        "symfony/maker-bundle": "^1.26"
     }
 }

@@ -261,12 +261,12 @@ class Referentiel
 
     public function getProgramme()
     {
-        return stream_get_contents($this->programme);
+        return base64_encode(stream_get_contents($this->programme));
     }
 
     public function setProgramme($programme): self
     {
-        $this->programme = base64_encode($programme);
+        $this->programme = $programme;
 
         return $this;
     }

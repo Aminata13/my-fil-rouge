@@ -38,18 +38,25 @@ class UserService
         
         $profil = $this->userProfilRepository->findOneBy(array("libelle" => $type));
 
+        if(isset($userTab['avatar'])) {
+            $tempAvatar = $userTab['avatar'];
+            unset($userTab['avatar']);
+        }
+
         $user = $this->serializer->denormalize($userTab, $entity, true);
         $user->setProfil($profil);
         $user->setPassword($this->encoder->encodePassword($user, $userTab['password']));
 
         /**Traitement de l'avatar de l'utilisateur */
-        $avatar = $request->files;
-        if (!is_null($avatar->get('avatar'))) {
+        $avatar = (isset($tempAvatar)) ? $tempAvatar : $request->files;
+        if (!isset($tempAvatar) && !is_null($avatar->get('avatar'))) {
             $avatarType = explode("/", $avatar->get('avatar')->getMimeType())[1];
             $avatarPath = $avatar->get('avatar')->getRealPath();
             $image = file_get_contents($avatarPath, 'img/img.' . $avatarType);
 
             $user->setAvatar($image);
+        } elseif(isset($tempAvatar)) {
+            $user->setAvatar(file_get_contents($avatar));
         }
 
         /**Validation */
@@ -62,7 +69,7 @@ class UserService
         $this->manager->persist($user);
         $this->manager->flush();
 
-        return new JsonResponse($this->serializer->serialize($user, 'json'), Response::HTTP_CREATED, [], true);
+        return new JsonResponse($this->serializer->serialize($user->getId(), 'json'), Response::HTTP_CREATED, [], true);
     }
 
     public function editUser($request, $repository) {
@@ -71,16 +78,17 @@ class UserService
 
         $data = $this->refineFormDataSrv->Refine($request);
 
-        foreach ($data as $key => $value) {
+
+       foreach ($data as $key => $value) {
             $setter = 'set'.ucfirst($key);
             if ($key == "password" && $value !== '') {
                 $user->$setter($this->encoder->encodePassword($user, $value));
             } elseif($value !== '') {
                 $user->$setter($value);
-            }
+            } 
         }
 
         $this->manager->flush();
-        return new JsonResponse($this->serializer->serialize($user, 'json'), Response::HTTP_OK, [], true);
+        return new JsonResponse($this->serializer->serialize($user->getId(), 'json'), Response::HTTP_OK, [], true);
     }
 }

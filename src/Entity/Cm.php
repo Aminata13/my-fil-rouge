@@ -52,27 +52,8 @@ class Cm extends User
      */
     protected $id;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     * @Assert\NotBlank(message="Le cni est obligatoire.")
-     * @Groups({"user:read"})
-     */
-    private $cni;
-
     public function getId(): ?int
     {
         return $this->id;
-    }
-
-    public function getCni(): ?string
-    {
-        return $this->cni;
-    }
-
-    public function setCni(string $cni): self
-    {
-        $this->cni = $cni;
-
-        return $this;
     }
 }

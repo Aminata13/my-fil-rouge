@@ -4,12 +4,10 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\UserRepository;
-use ApiPlatform\Core\Annotation\ApiFilter;
 use ApiPlatform\Core\Annotation\ApiResource;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Security\Core\User\UserInterface;
-use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
 
 /**
  * @ORM\Entity(repositoryClass=UserRepository::class)
@@ -19,7 +17,7 @@ use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
  * @ApiResource(iri="http://schema.org/Users",
  *  routePrefix="/admin",
  *  collectionOperations={
- *      "get"={"normalization_context"={"groups"={"user:read"}},"pagination_fetch_join_collection"=true,}
+ *      "get"={"normalization_context"={"groups"={"user:read"}}}
  *  },
  *  subresourceOperations={
  *      "api_user_profils_users_get_subresource"={
@@ -27,15 +25,15 @@ use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
  *      }
  *  },
  *  itemOperations={
- *      "get", "delete"
+ *      "get"={
+ *          "normalization_context"={"groups"={"user:read"}}}, 
+ *      "delete"
  *  },
  *  attributes={
  *      "security"="is_granted('ROLE_ADMIN')",
- *      "security_message"="Vous n'avez pas accès à cette ressource.",
- *      "pagination_items_per_page"=3
+ *      "security_message"="Vous n'avez pas accès à cette ressource."
  *  }
  * )
- * @ApiFilter(SearchFilter::class, properties={"profil.libelle"})
  */
 class User implements UserInterface
 {
@@ -112,6 +110,25 @@ class User implements UserInterface
      * @ORM\Column(type="boolean")
      */
     private $deleted=false;
+
+    /**
+     * @ORM\Column(type="string", length=255)
+     * @Assert\NotBlank(message="Le numéro de téléphone est obligatoire.")
+     * @Groups({"user:read","profilSortie:read"})
+     */
+    private $firstPhoneNumber;
+
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     * @Groups({"user:read","profilSortie:read"})
+     */
+    private $secondPhoneNumber;
+
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     * @Groups({"user:read","profilSortie:read"})
+     */
+    private $cni;
 
     public function getId(): ?int
     {
@@ -266,6 +283,42 @@ class User implements UserInterface
     public function setDeleted(bool $deleted): self
     {
         $this->deleted = $deleted;
+
+        return $this;
+    }
+
+    public function getFirstPhoneNumber(): ?string
+    {
+        return $this->firstPhoneNumber;
+    }
+
+    public function setFirstPhoneNumber(string $firstPhoneNumber): self
+    {
+        $this->firstPhoneNumber = $firstPhoneNumber;
+
+        return $this;
+    }
+
+    public function getSecondPhoneNumber(): ?string
+    {
+        return $this->secondPhoneNumber;
+    }
+
+    public function setSecondPhoneNumber(?string $secondPhoneNumber): self
+    {
+        $this->secondPhoneNumber = $secondPhoneNumber;
+
+        return $this;
+    }
+
+    public function getCni(): ?string
+    {
+        return $this->cni;
+    }
+
+    public function setCni(?string $cni): self
+    {
+        $this->cni = $cni;
 
         return $this;
     }

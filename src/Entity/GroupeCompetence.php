@@ -31,12 +31,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  *          "path"="/groupe_competences/competences",
  *          "access_control"="(is_granted('ROLE_ADMIN'))"
  *      },
- *      "post_groupe_competence"={
- *         "method"="POST",
- *         "path"="/groupe_competences",
- *         "controller"=GroupeCompetenceController::class,
- *         "route_name"="add_groupe_competence"
- *     }
+ *      "post"
  *  },
  *  itemOperations={
  *      "get"={
@@ -48,13 +43,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  *          "path"="/groupe_competences/{id}/competences",
  *          "security"="(is_granted('ROLE_ADMIN') or is_granted('ROLE_FORMATEUR') or is_granted('ROLE_CM'))"
  *      },
- *      "put_groupe_competence"={
- *         "method"="PUT",
- *         "path"="/groupe_competences/{id}",
- *         "controller"=GroupeCompetenceController::class,
- *         "route_name"="edit_groupe_competence",
- *         "denormalization_context"={"groups"={"grpcompetence:write"}}
- *     },
+ *      "put",
  *      "delete"
  *  }
  * )
@@ -65,14 +54,14 @@ class GroupeCompetence
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
-     * @Groups({"grpcompetence:read","grpcompetence:read_all","referentiel:read","referentiel:read_all"})
+     * @Groups({"competence:read_all","grpcompetence:read","grpcompetence:read_all","referentiel:read","referentiel:read_all"})
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=255)
      * @Assert\NotBlank(message="Le libelle est obligatoire.")
-     * @Groups({"grpcompetence:read","grpcompetence:read_all","grpcompetence:write","referentiel:read","referentiel:read_all","referentiel:write"})
+     * @Groups({"competence:read_all","grpcompetence:read","grpcompetence:read_all","grpcompetence:write","referentiel:read","referentiel:read_all","referentiel:write"})
      */
     private $libelle;
 

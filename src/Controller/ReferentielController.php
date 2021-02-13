@@ -91,16 +91,14 @@ class ReferentielController extends AbstractController
             return new JsonResponse($errorsString, Response::HTTP_BAD_REQUEST, [], true);
         }
 
-        $file = $request->files;
-        if (is_null($file->get('programme'))) {
+        $file = $request->files->get('programme');
+        if (is_null($file)) {
             return new JsonResponse("Le programme est requis.", Response::HTTP_BAD_REQUEST, [], true);
         }
-        $fileType = explode("/", $file->get('programme')->getMimeType())[1];
-        $filePath = $file->get('programme')->getRealPath();
 
-        $programme = file_get_contents($filePath, 'programme.'.$fileType);
+        $programme = fopen($file->getRealPath(), "rb");
         $referentiel->setProgramme($programme);
-
+        
         
         $this->manager->persist($referentiel);
         $this->manager->flush();

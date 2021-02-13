@@ -5,6 +5,8 @@ namespace App\DataProvider;
 use ApiPlatform\Core\Bridge\Doctrine\Orm\Extension\PaginationExtension;
 use ApiPlatform\Core\Bridge\Doctrine\Orm\Util\QueryNameGenerator;
 use ApiPlatform\Core\DataProvider\CollectionDataProviderInterface;
+use Doctrine\ORM\Tools\Pagination\Paginator as DoctrinePaginator;
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Paginator;
 use ApiPlatform\Core\DataProvider\ContextAwareCollectionDataProviderInterface;
 use ApiPlatform\Core\DataProvider\RestrictedDataProviderInterface;
 use App\Repository\UserRepository;
@@ -12,14 +14,10 @@ use Doctrine\Persistence\ManagerRegistry;
 
 class UserDataProvider implements ContextAwareCollectionDataProviderInterface, RestrictedDataProviderInterface {
     
-    private $userRepository;
-    private $paginator;
     private $manager;
     
-    public function __construct(UserRepository $userRepository, PaginationExtension $paginator, ManagerRegistry $manager)
+    public function __construct(ManagerRegistry $manager)
     {
-        $this->userRepository = $userRepository;
-        $this->paginator = $paginator;
         $this->manager = $manager;
     }
 
@@ -30,17 +28,28 @@ class UserDataProvider implements ContextAwareCollectionDataProviderInterface, R
 
     public function getCollection(string $resourceClass, string $operationName = null, array $context = [])
     {
+        $page = (isset($context['filters']['page'])) ? $context['filters']['page'] : 1;
+        $size = (isset($context['filters']['size'])) ? $context['filters']['size'] : 3;
+        $firstname = (isset($context['filters']['firstname'])) ? $context['filters']['firstname'] : '';
+
+        $firstResult = ($page -1) * $size;
+
         $queryBuilder = $this->manager
         ->getManagerForClass($resourceClass)
         ->getRepository($resourceClass)
         ->createQueryBuilder('u')
         ->innerJoin('u.profil', 'p')
-            ->andWhere('u.deleted = :deleted AND p.libelle != :profil')
-            ->setParameters(array('deleted'=>false, 'profil'=>'APPRENANT'))
+            ->andWhere('u.deleted = :deleted AND u.firstname LIKE :firstname AND p.libelle != :profil')
+            ->setParameters(array('deleted'=>false, 'firstname'=>'%'.$firstname.'%', 'profil'=>'APPRENANT'))
         ;
         
-        $this->paginator->applyToCollection($queryBuilder, new QueryNameGenerator, $resourceClass, $operationName, $context);
+        $query = $queryBuilder->getQuery()
+            ->setFirstResult($firstResult)
+            ->setMaxResults($size);
 
-        return $queryBuilder->getQuery()->getResult();
+        $doctrinePaginator = new DoctrinePaginator($query);
+        $paginator = new Paginator($doctrinePaginator);
+
+        return $paginator;
     }
 }

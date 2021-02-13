@@ -28,17 +28,13 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  *      "get"={
  *          "security"="is_granted('ROLE_ADMIN') or is_granted('ROLE_FORMATEUR') or is_granted('ROLE_CM')"
  *      },
- *      "post"={
- *          "security"="is_granted('ROLE_ADMIN')"
- *      }
+ *      "post"
  *  },
  *  itemOperations={
  *      "get"={
  *          "security"="is_granted('ROLE_ADMIN') or is_granted('ROLE_FORMATEUR') or is_granted('ROLE_CM')"
  *      },
- *      "put"={
- *          "security"="is_granted('ROLE_ADMIN')"
- *      },
+ *      "put",
  *      "delete"
  *  }
  * )
@@ -56,7 +52,7 @@ class Competence
     /**
      * @ORM\Column(type="string", length=255)
      * @Assert\NotBlank(message="Le libelle est obligatoire.")
-     * @Groups({"competence:read_all", "competence:write", "grpcompetence:read", "grpcompetence:read_all", "grpcompetence:write", "referentiel:read_all"})
+     * @Groups({"competence:read_all", "competence:write", "grpcompetence:write", "grpcompetence:read", "grpcompetence:read_all", "referentiel:read_all"})
      */
     private $libelle;
 
@@ -67,6 +63,11 @@ class Competence
 
     /**
      * @ORM\ManyToMany(targetEntity=GroupeCompetence::class, mappedBy="competences")
+     * @Assert\Count(
+     *      min = 1,
+     *      minMessage="Le groupe de compétences est obligatoire."
+     * )
+     * @Groups({"competence:read_all","competence:write"})
      */
     private $groupeCompetences;
 

@@ -43,7 +43,6 @@ class ApprenantController extends AbstractController
      */
     public function editUser(Request $request, ApprenantRepository $repository): Response
     {
-        dd('hello');
         return $this->userService->editUser($this->request, $repository);
     }
 }

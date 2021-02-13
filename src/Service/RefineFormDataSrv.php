@@ -14,7 +14,6 @@ class RefineFormDataSrv {
         $elements = str_replace([$boundary, "Content-Disposition: form-data;"], "", $raw);
         $elementsTab = explode("\r\n\r\n", $elements);
         
-        dd($elementsTab);
         $data = [];
         for ($i=0; isset($elementsTab[$i]); $i+=2) {
             $key = str_replace(["\r\n", ' "', '"', ' name='], '', $elementsTab[$i]);
@@ -22,6 +21,9 @@ class RefineFormDataSrv {
                 $data['avatar'] = $elementsTab[$i+1];
             } else {
                 $val = str_replace(["\r\n","--"], '', $elementsTab[$i+1]);
+                if ($key == 'avatar') {
+                    $val = str_replace(['data:image/jpeg;base64,', 'data:image/png;base64,'], '', $elementsTab[$i+1]);
+                }
                 $data[$key] = $val;
             }
         }
