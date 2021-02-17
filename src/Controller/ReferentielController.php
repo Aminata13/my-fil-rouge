@@ -74,15 +74,6 @@ class ReferentielController extends AbstractController
                 $referentiel->addCritereEvaluation($critereEvaluation);
             }
         }
-
-        foreach ($data['groupeCompetences'] as $value) {
-            if ($value != "") {
-                $groupeCompetence = $this->groupeCompetenceRepository->findOneBy(array('libelle' => $value));
-                if (!is_null($groupeCompetence)) {
-                    $referentiel->addGroupeCompetence($groupeCompetence);
-                }
-            }
-        }
     
 
         $errors = $this->validator->validate($referentiel);
@@ -92,6 +83,7 @@ class ReferentielController extends AbstractController
         }
 
         $file = $request->files->get('programme');
+        
         if (is_null($file)) {
             return new JsonResponse("Le programme est requis.", Response::HTTP_BAD_REQUEST, [], true);
         }

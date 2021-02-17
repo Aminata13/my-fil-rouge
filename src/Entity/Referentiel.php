@@ -109,9 +109,9 @@ class Referentiel
      * @ORM\ManyToMany(targetEntity=GroupeCompetence::class, inversedBy="referentiels")
      * @Assert\Count(
      *      min = 1,
-     *      minMessage="Au moins un critère d'admission est requis."
+     *      minMessage="Au moins un groupe de compétences est requis."
      * )
-     * @Groups({"referentiel:read","referentiel:read_all"})
+     * @Groups({"referentiel:read","referentiel:read_all","referentiel:write"})
      * @ApiSubresource
      */
     private $groupeCompetences;
